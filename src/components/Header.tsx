@@ -15,94 +15,95 @@ import {
 export const Header: React.FC = () => {
   const {
     stats,
-    settings,
     isCameraActive,
     isPaused,
     videoSource,
+    setVideoSource,
     startCamera,
     stopCamera,
     togglePause,
-    visionStatus,
     resetTracker,
   } = useMonitoring();
 
   return (
-    <header className="h-16 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
-      {/* Brand & Identity */}
+    <header className="h-14 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between z-30 shrink-0 select-none">
+      {/* Brand & AI Indicator */}
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-sm shadow-cyan-500/20">
-          <Activity className="w-5 h-5" />
+          <Activity className="w-4 h-4" />
         </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-sm font-semibold tracking-wide text-slate-100 uppercase">
-              AI Activity Monitoring Agent
-            </h1>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-400 border border-cyan-800/40">
-              COCO-17
-            </span>
-          </div>
-          <p className="text-[11px] text-slate-400 font-mono">
-            ANONYMOUS COMPUTER VISION • ZERO BIOMETRIC LOGGING
-          </p>
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-sm font-semibold tracking-wider text-slate-100 uppercase">
+            AI Vision Monitor
+          </h1>
+          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-800/60 text-emerald-400 text-[10px] font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            LIVE
+          </span>
         </div>
       </div>
 
-      {/* Model & System Status Indicators (Requirement #28) */}
-      <div className="hidden xl:flex items-center gap-4 text-xs font-mono">
-        {/* AI Engine Status */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900/80 border border-slate-800">
-          <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="text-slate-400">AI ENGINE</span>
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
-          <span className="text-emerald-400 font-medium">ONLINE</span>
+      {/* Primary Actions & Controls */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Video Mode Switcher */}
+        <div className="flex items-center bg-slate-900/80 p-1 rounded-lg border border-slate-800 text-xs font-mono">
+          <button
+            onClick={() => {
+              if (videoSource !== 'webcam') {
+                setVideoSource('webcam');
+                startCamera();
+              }
+            }}
+            className={`px-2.5 py-1 rounded transition-colors flex items-center gap-1.5 ${
+              videoSource === 'webcam'
+                ? 'bg-cyan-500/20 text-cyan-300 font-bold'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Camera className="w-3.5 h-3.5" />
+            <span>Webcam</span>
+          </button>
+          <button
+            onClick={() => {
+              if (isCameraActive) stopCamera();
+              setVideoSource('demo');
+            }}
+            className={`px-2.5 py-1 rounded transition-colors flex items-center gap-1.5 ${
+              videoSource === 'demo'
+                ? 'bg-purple-500/20 text-purple-300 font-bold'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Video className="w-3.5 h-3.5" />
+            <span>Demo</span>
+          </button>
         </div>
 
-        {/* Pose Model */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900/80 border border-slate-800">
-          <Eye className="w-3.5 h-3.5 text-indigo-400" />
-          <span className="text-slate-400">POSE MODEL</span>
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
-          <span className="text-slate-200">READY</span>
-        </div>
+        {/* Camera Start / Stop */}
+        {videoSource === 'webcam' && (
+          isCameraActive ? (
+            <button
+              onClick={stopCamera}
+              className="px-3 py-1.5 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-300 hover:bg-rose-900/60 text-xs font-medium flex items-center gap-1.5 transition-colors"
+            >
+              <Camera className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Stop Camera</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => startCamera()}
+              className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 shadow-sm shadow-cyan-500/25 transition-colors"
+            >
+              <Camera className="w-3.5 h-3.5" />
+              <span>Start Camera</span>
+            </button>
+          )
+        )}
 
-        {/* Multi-Person Tracking */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900/80 border border-slate-800">
-          <span className="text-slate-400">TRACKING</span>
-          <span className="inline-block w-2 h-2 rounded-full bg-cyan-400" />
-          <span className="text-cyan-400 font-medium">ACTIVE</span>
-        </div>
-
-        {/* Facial Expression Model (FER-2013 / AffectNet / CK+) */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900/80 border border-slate-800">
-          <span className="text-slate-400">FACE AI</span>
-          <span className="inline-block w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.6)]" />
-          <span className="text-purple-300 font-medium">{settings.facialDataset}</span>
-        </div>
-
-        {/* Privacy Lock Badge */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-950/30 border border-emerald-900/40 text-emerald-400">
-          <Lock className="w-3 h-3" />
-          <span className="text-[11px]">PRIVACY SHIELD</span>
-        </div>
-      </div>
-
-      {/* Camera Controls & Performance Telemetry */}
-      <div className="flex items-center gap-3">
-        {/* FPS Indicator */}
-        <div className="text-right hidden sm:block">
-          <div className="text-xs font-mono font-bold text-slate-200">
-            {stats.fps} <span className="text-[10px] text-slate-500 font-normal">FPS</span>
-          </div>
-          <div className="text-[10px] font-mono text-emerald-400">
-            {stats.avgConfidence}% CONF
-          </div>
-        </div>
-
-        {/* Pause / Resume Button */}
+        {/* Pause / Resume */}
         <button
           onClick={togglePause}
-          className={`px-3 py-1.5 rounded-lg border text-xs font-medium flex items-center gap-1.5 transition-colors ${
+          className={`p-1.5 sm:px-3 sm:py-1.5 rounded-lg border text-xs font-medium flex items-center gap-1.5 transition-colors ${
             isPaused
               ? 'bg-amber-950/40 border-amber-800/60 text-amber-300 hover:bg-amber-900/40'
               : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
@@ -110,36 +111,23 @@ export const Header: React.FC = () => {
           title={isPaused ? 'Resume monitoring' : 'Pause monitoring'}
         >
           {isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
-          <span>{isPaused ? 'RESUME' : 'PAUSE'}</span>
+          <span className="hidden sm:inline">{isPaused ? 'Resume' : 'Pause'}</span>
         </button>
-
-        {/* Camera Toggle Button */}
-        {isCameraActive ? (
-          <button
-            onClick={stopCamera}
-            className="px-3.5 py-1.5 rounded-lg bg-rose-950/50 border border-rose-800 text-rose-300 hover:bg-rose-900/50 text-xs font-semibold flex items-center gap-1.5 transition-colors"
-          >
-            <Camera className="w-3.5 h-3.5" />
-            <span>STOP CAMERA</span>
-          </button>
-        ) : (
-          <button
-            onClick={() => startCamera()}
-            className="px-3.5 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 text-xs font-semibold flex items-center gap-1.5 shadow-sm shadow-cyan-500/20 transition-colors"
-          >
-            <Camera className="w-3.5 h-3.5" />
-            <span>START CAMERA</span>
-          </button>
-        )}
 
         {/* Reset Tracker */}
         <button
           onClick={resetTracker}
           className="p-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
-          title="Reset Person IDs and Tracker"
+          title="Reset Person IDs"
         >
           <RefreshCw className="w-3.5 h-3.5" />
         </button>
+
+        {/* Telemetry FPS */}
+        <div className="hidden md:flex items-center gap-2 pl-2 border-l border-slate-800 text-xs font-mono">
+          <span className="text-slate-400 font-bold">{stats.fps} FPS</span>
+          <span className="text-emerald-400">{stats.avgConfidence}% CONF</span>
+        </div>
       </div>
     </header>
   );

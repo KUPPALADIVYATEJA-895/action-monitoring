@@ -8,7 +8,7 @@ import React, { useEffect, useRef } from 'react';
 import { useMonitoring } from '../../context/MonitoringContext';
 import { SKELETON_PAIRS, TrackedPerson } from '../../types';
 import { EXPRESSION_COLORS } from '../../services/facialExpression';
-import { Camera, AlertCircle, Loader2, Play, Sparkles, Video, Smile, ScanFace, Eye } from 'lucide-react';
+import { Camera, AlertCircle, Loader2, Play, Sparkles, Video, Smile, ScanFace, Eye, Square } from 'lucide-react';
 
 export const PersonOverlay: React.FC = () => {
   const {
@@ -477,10 +477,12 @@ export const PersonOverlay: React.FC = () => {
     setSelectedPersonId(clickedPersonId);
   };
 
+  const activePerson = selectedPerson || people[0] || null;
+
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full min-h-[420px] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-2xl flex items-center justify-center select-none"
+      className="relative w-full h-full bg-slate-950 overflow-hidden flex items-center justify-center select-none"
     >
       {/* Underlying Video Element for Webcam or Upload */}
       <video
@@ -502,45 +504,61 @@ export const PersonOverlay: React.FC = () => {
         className="w-full h-full object-contain cursor-crosshair relative z-10"
       />
 
-      {/* Status Watermark */}
+      {/* Top Left: Live Status Indicator Watermark */}
       <div className="absolute top-4 left-4 z-20 flex items-center gap-2 pointer-events-none">
         <span className="flex h-2.5 w-2.5 relative">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
         </span>
-        <span className="text-xs font-mono font-semibold tracking-wider text-emerald-400 uppercase bg-slate-900/80 px-2 py-0.5 rounded border border-emerald-900/40">
+        <span className="text-xs font-mono font-semibold tracking-wider text-emerald-400 uppercase bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-emerald-900/40">
           {videoSource === 'webcam' && isCameraActive
-            ? 'LIVE CAMERA ACTIVE'
+            ? 'LIVE CAMERA'
             : videoSource === 'upload'
             ? 'VIDEO FILE'
-            : 'DEMO KINEMATIC MODE'}
+            : 'DEMO SIMULATION'}
         </span>
-        <span className="text-xs font-mono text-slate-400 bg-slate-900/70 px-2 py-0.5 rounded border border-slate-800">
-          PERSONS: {people.length}
+        <span className="text-xs font-mono text-slate-300 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-slate-800">
+          PERSONS: <strong className="text-cyan-400">{people.length}</strong>
         </span>
       </div>
 
-      {/* Real-Time Visual Toggles (Requirement #16: SHOW FACE BOX ON/OFF, SHOW EXPRESSION ON/OFF) */}
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-slate-950/80 backdrop-blur-md p-1 rounded-lg border border-slate-800/80 shadow-lg">
+      {/* Top Right: Futuristic Floating AI HUD Overlays */}
+      <div className="absolute top-4 right-4 z-20 flex flex-wrap items-center gap-1.5 bg-slate-950/85 backdrop-blur-md p-1.5 rounded-xl border border-slate-800/90 shadow-xl">
+        {/* Toggle Body Box */}
+        <button
+          onClick={() => updateSettings({ showBoundingBoxes: !settings.showBoundingBoxes })}
+          title="Toggle Body Bounding Box"
+          className={`px-2.5 py-1 text-[11px] font-mono font-medium rounded-lg transition-all flex items-center gap-1.5 ${
+            settings.showBoundingBoxes
+              ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-800/80 shadow-sm'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+          }`}
+        >
+          <Square className="w-3.5 h-3.5" />
+          <span>BOX {settings.showBoundingBoxes ? 'ON' : 'OFF'}</span>
+        </button>
+
+        {/* Toggle Face Box */}
         <button
           onClick={() => updateSettings({ showFaceBox: !settings.showFaceBox })}
           title="Toggle Face Bounding Box"
-          className={`px-2.5 py-1 text-[11px] font-mono font-medium rounded transition-all flex items-center gap-1.5 ${
+          className={`px-2.5 py-1 text-[11px] font-mono font-medium rounded-lg transition-all flex items-center gap-1.5 ${
             settings.showFaceBox
               ? 'bg-purple-950/80 text-purple-300 border border-purple-800/80 shadow-sm'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
           }`}
         >
           <ScanFace className="w-3.5 h-3.5" />
-          <span>FACE BOX {settings.showFaceBox ? 'ON' : 'OFF'}</span>
+          <span>FACE {settings.showFaceBox ? 'ON' : 'OFF'}</span>
         </button>
 
+        {/* Toggle Expression */}
         <button
           onClick={() => updateSettings({ showExpressionLabel: !settings.showExpressionLabel })}
           title="Toggle Live Expression Overlay"
-          className={`px-2.5 py-1 text-[11px] font-mono font-medium rounded transition-all flex items-center gap-1.5 ${
+          className={`px-2.5 py-1 text-[11px] font-mono font-medium rounded-lg transition-all flex items-center gap-1.5 ${
             settings.showExpressionLabel
-              ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-800/80 shadow-sm'
+              ? 'bg-amber-950/80 text-amber-300 border border-amber-800/80 shadow-sm'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
           }`}
         >
@@ -548,18 +566,113 @@ export const PersonOverlay: React.FC = () => {
           <span>EXPRESSION {settings.showExpressionLabel ? 'ON' : 'OFF'}</span>
         </button>
 
+        {/* Toggle Pose Skeleton */}
         <button
           onClick={() => updateSettings({ showPose: !settings.showPose })}
           title="Toggle Skeleton Connections"
-          className={`px-2.5 py-1 text-[11px] font-mono font-medium rounded transition-all flex items-center gap-1.5 ${
+          className={`px-2.5 py-1 text-[11px] font-mono font-medium rounded-lg transition-all flex items-center gap-1.5 ${
             settings.showPose
               ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/80 shadow-sm'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
           }`}
         >
           <Eye className="w-3.5 h-3.5" />
-          <span>POSE {settings.showPose ? 'ON' : 'OFF'}</span>
+          <span>SKELETON {settings.showPose ? 'ON' : 'OFF'}</span>
         </button>
+      </div>
+
+      {/* Bottom Left: Sleek Floating AI Active Subject HUD Card */}
+      <div className="absolute bottom-4 left-4 z-20 pointer-events-auto max-w-sm sm:max-w-md w-auto">
+        {activePerson ? (
+          <div className="bg-slate-950/90 backdrop-blur-md border border-slate-800/90 rounded-2xl p-3 sm:p-3.5 shadow-2xl flex flex-col gap-2 transition-all">
+            {/* Subject Identity & Movement */}
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-3 h-3 rounded-full shadow-sm"
+                  style={{ backgroundColor: activePerson.color || '#06b6d4' }}
+                />
+                <span className="font-mono font-bold text-sm text-slate-100">
+                  {activePerson.id}
+                </span>
+                <span
+                  className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full ${
+                    activePerson.movement === 'MOVING'
+                      ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/60'
+                      : 'bg-slate-800/80 text-slate-400 border border-slate-700/60'
+                  }`}
+                >
+                  {activePerson.movement}
+                </span>
+              </div>
+              <span className="text-xs font-mono text-slate-400">
+                {String(Math.floor(activePerson.activityDurationSeconds / 60)).padStart(2, '0')}:
+                {String(activePerson.activityDurationSeconds % 60).padStart(2, '0')}
+              </span>
+            </div>
+
+            {/* Action & Facial Expression Badges */}
+            <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-800/70">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold font-mono tracking-wide text-cyan-300">
+                  {activePerson.activity.toUpperCase()}
+                </span>
+                <span className="text-[10px] font-mono text-slate-400">
+                  ({Math.round(activePerson.confidence * 100)}%)
+                </span>
+              </div>
+
+              {activePerson.face?.detected && activePerson.face.expression.label !== 'Not Analyzed' ? (
+                <div className="flex items-center gap-1.5 text-xs font-mono">
+                  <span
+                    className="w-2 h-2 rounded-full"
+                    style={{
+                      backgroundColor:
+                        EXPRESSION_COLORS[activePerson.face.expression.label] || '#a855f7',
+                    }}
+                  />
+                  <span className="text-purple-300 font-semibold">
+                    {activePerson.face.expression.label}
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {Math.round(activePerson.face.expression.confidence * 100)}%
+                  </span>
+                </div>
+              ) : (
+                <span className="text-[10px] font-mono text-slate-500">
+                  {activePerson.face?.expression.status || 'FACE SCANNING'}
+                </span>
+              )}
+            </div>
+
+            {/* Multi-Person Focus Switcher */}
+            {people.length > 1 && (
+              <div className="flex items-center gap-1.5 pt-2 border-t border-slate-800/70">
+                <span className="text-[10px] font-mono text-slate-500">TRACKS:</span>
+                <div className="flex items-center gap-1 overflow-x-auto">
+                  {people.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => setSelectedPersonId(p.id)}
+                      className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors ${
+                        p.id === activePerson.id
+                          ? 'bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold'
+                          : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 border border-slate-800'
+                      }`}
+                    >
+                      {p.id}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="bg-slate-950/80 backdrop-blur-md border border-slate-800/80 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-400 flex items-center gap-2 shadow-lg">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            <span>AI SCANNING FIELD OF VIEW (COCO-17 + FACE)</span>
+          </div>
+        )}
       </div>
 
       {/* Direct One-Click Camera Prompt when camera not streaming in webcam mode */}
