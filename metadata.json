@@ -1,0 +1,10 @@
+{
+  "name": "AI Activity Monitoring Agent",
+  "description": "Real-time human activity monitoring system with COCO pose estimation, multi-person tracking, action recognition, and AI-assisted analytics.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
